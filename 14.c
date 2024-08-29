@@ -1,0 +1,147 @@
+//minimum spanning tree using prims algorithm 
+#include<stdio.h>
+#include<stdlib.h>
+#include<limits.h>
+
+typedef struct edge{
+    int v,u,dist;
+}edg;
+
+edg heap[10],vt[10];
+int n,cost[10][10],visited[10],removed[10],cnt=0,heapSize=0,heapCount,graphCount;
+
+void swap(edg* a,edg *b){
+    edg temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+edg deleteEdge(edg* heap){
+    edg min = heap[0];
+    heap[0] = heap[heapSize-1];
+    heapSize--;
+    return min;
+}
+
+void heapify(edg* heap,int sz,int root){
+    int smallest=root, left = 2*root+1, right = 2*root+2;
+    heapCount++;
+    if(left < sz && heap[left].dist < heap[smallest].dist)
+        smallest = left;
+    if(right < sz && heap[right].dist < heap[smallest].dist)
+        smallest = right;
+    if(smallest != root){
+        swap(&heap[smallest],&heap[root]);
+        heapify(heap,sz,smallest);
+    }
+}
+
+void heapSort(edg* heap,int sz){
+    for(int i=sz/2-1;i>=0;i--)
+        heapify(heap,sz,i);
+}
+
+void prims()
+{
+    visited[0]=1;
+    heap[heapSize].v = -1; 
+    heap[heapSize].u = 0; 
+    heap[heapSize].dist = 0;
+    heapSize++;
+    while(cnt != n){
+        edg min = deleteEdge(heap);
+        vt[cnt].v = min.v;
+        vt[cnt].u = min.u;
+        vt[cnt].dist = min.dist;
+        int par = vt[cnt].u; 
+      removed[par]=1;
+      cnt++;
+        for(int i=1;i<n;i++){
+            graphCount++;
+            if(!visited[i] && cost[par][i] != INT_MAX && !removed[i]){
+                visited[i] = 1;
+                heap[heapSize].v = par;
+                heap[heapSize].u = i;
+                heap[heapSize].dist = cost[par][i];
+                heapSize++;
+            }
+            else if(visited[i] && cost[par][i] != INT_MAX && !removed[i]){
+                for(int j=0;j<heapSize;j++){
+                    if(heap[j].u==i && cost[par][i] < heap[j].dist){
+                        heap[j].dist = cost[par][i];
+                        heap[j].v = par;break;
+                    }
+                }
+            }
+        }heapSort(heap,heapSize);
+    } 
+}
+
+void makeGraph(){
+    heapSize=0;heapCount=0;cnt=0;graphCount=0;
+    printf("\nEnter the no of vertices : ");
+    scanf("%d",&n);
+    printf("\nEnter the cost adjacency matrix : \n");
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            scanf("%d",&cost[i][j]);
+            if(cost[i][j] == 0)
+                cost[i][j] = INT_MAX;
+        }visited[i]=0;removed[i]=0;
+    }
+}
+
+void tester(){
+    int sum=0;
+    makeGraph();
+    prims();
+    for(int i=1;i<n;i++){
+        printf("\n%c-->%c == %d\n",vt[i].v+65,vt[i].u+65,vt[i].dist);
+        sum += vt[i].dist;
+    }
+    printf("\nThe minimum cost is %d",sum);
+}
+
+void plotter(){
+    FILE * f1;
+    f1 = fopen("prims.txt","w");
+    for(n=4;n<=10;n++){
+        heapSize=0;heapCount=0;cnt=0;graphCount=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                cost[i][j] = rand()%n;
+                if(i == j || cost[i][j]==0)
+                    cost[i][j] = INT_MAX;
+            }visited[i]=0;removed[i]=0;
+        }
+        prims();
+        cnt = (graphCount>heapCount)?graphCount:heapCount;
+        fprintf(f1,"%d\t%d\n",n,cnt);
+    }fclose(f1);
+}
+
+void main(){
+    int ch;
+    while (1)
+    {
+        printf("\nEnter \n1.For tester \n2.For plotter \n3.To exit  ");
+        scanf("%d",&ch);
+        switch (ch)
+        {
+        case 1:
+            tester();
+            break;
+        
+        case 2:
+            plotter();
+            printf("\nGraph plotted!");
+            break;
+        
+        case 3: exit(0);
+        
+        default:
+            break;
+        }
+    }
+    
+}
