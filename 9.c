@@ -35,7 +35,7 @@ void tester()
         return;
     }
 
-    for(int i=0 ; i<n ; i++ )
+    for(int i=n-1; i>0 ; i--)
         printf("-->%c",97+Stack[i]);
 }
 
